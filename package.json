@@ -4,7 +4,7 @@
   "description": "Continuous work animation for compatible pets, with per-pet controls and Chinese/English settings. Disable to restore native playback.",
   "type": "module",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "keywords": ["codex-tweaks-package", "codex-tweaks-ui"],
   "scripts": { "test": "node --test tests/*.test.js" },
   "dependencies": {},
