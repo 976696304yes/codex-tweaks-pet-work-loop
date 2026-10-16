@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 Continuous work animation for compatible Codex pets, with individual switches. Only native `running` playback changes—not artwork, models or task state.
 
-Package ID: `ct-pet-work-loop`. Directory / suggested repository: `codex-tweaks-pet-work-loop`. Version: 1.1.0 (unpublished, including this bilingual revision).
+Package ID: `ct-pet-work-loop`. Repository: [codex-tweaks-pet-work-loop](https://github.com/976696304yes/codex-tweaks-pet-work-loop). Version: 1.1.0.
 
 ## Features
 
@@ -18,7 +18,7 @@ Package ID: `ct-pet-work-loop`. Directory / suggested repository: `codex-tweaks-
 
 ## Install and configure
 
-1. Install Codex Tweaks. Import this directory or ZIP as one package with `package.json` at its root. Once a real repository/release exists, install that repository's released tag. Nothing has been published yet.
+1. Install [Pet Work Loop](https://github.com/976696304yes/codex-tweaks-pet-work-loop) through Codex Tweaks using the repository URL and select the `v1.1.0` tag. Alternatively, download the package ZIP from [Releases](https://github.com/976696304yes/codex-tweaks-pet-work-loop/releases), extract it, and install the package folder with `package.json` at its root.
 2. Disable/remove an older-named installation first (keep a backup) to avoid duplicate copies. New package identities require manual enabling.
 3. Compile/reinject and enable `ct-pet-work-loop` in Tweaks. No Node authorization is needed.
 4. Open **Settings → Pet Work Loop**, in the personal group after the native pets entry. Configure language and master/default/per-pet switches.
@@ -70,6 +70,12 @@ node --check src/i18n.js
 
 Serve the project's parent over local HTTP and open `tests/harness.html`. It uses a documented-shape settings stub, not the real router. An optional sibling QQpet checkout supplies test artwork; none is included here, and CSS/DOM checks run without it.
 
-## License and publication
+## License
 
-Unpublished. `UNLICENSED` means no open-source permission is granted, not the Unlicense. Choose a license and add its complete LICENSE before declaring the code open source. Add repository/homepage metadata only after a real repository exists. Do not upload local preferences or archived installations.
+Licensed under the [MIT License](LICENSE).
+
+This license applies to the plugin code and documentation in this repository. No QQ/Tencent character artwork or extracted Codex client modules are included.
+
+This is an unofficial third-party project and is not affiliated with OpenAI or Tencent.
+
+Do not commit local preferences, personal account records, credentials, logs or archived installations.
