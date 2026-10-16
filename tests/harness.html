@@ -1,0 +1,124 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<title>Pet Work Loop 1.1 浏览器测试</title>
+<style>
+body { margin:0; font:14px/1.5 system-ui; color:#182329; background:#f4f6f7; } header { padding:20px 28px; border-bottom:1px solid #ced7dc; }
+.layout { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:20px; padding:20px; } .side { position:sticky; top:16px; align-self:start; background:white; padding:16px; border-radius:12px; }
+.pet { width:192px; height:208px; background-image:url('../../QQpet-codex-modified/assets/QQpet-codex/spritesheet.png'); background-repeat:no-repeat; background-size:800% 900%; }
+iframe { width:100%; height:300px; border:1px solid #ccd5da; border-radius:12px; }
+pre { white-space:pre-wrap; font-size:12px; } #report { padding:24px; } @media(max-width:800px) { .layout { grid-template-columns:1fr; } .side { position:static; } }
+</style>
+<header><h1>Pet 工作动画 · 1.1.0</h1><p>真实浏览器测试夹具，不是真实账户管理页；各测试 ID 共用本地 QQpet 图集用于观察动画。</p><p id="status" role="status">测试中</p></header>
+<div class="layout"><main id="settings"></main><aside class="side">
+<h2>Codex 测试 ID</h2><div id="a" class="pet" data-codex-pet-id="codex" data-codex-pet-state="running" style="background-size:800% 900%;background-position:0% 0%"></div>
+<h2>自定义测试 ID</h2><div id="b" class="pet" data-codex-pet-id="custom:Demo-Penguin" data-codex-pet-state="running" style="background-size:800% 900%;background-position:0% 0%"></div>
+<h2>另一渲染窗口（同源 iframe）</h2><iframe id="peer" title="跨窗口测试"></iframe>
+</aside></div><details id="report"><summary>自动化测试报告</summary><pre id="result"></pre></details>
+<script type="module">
+import { activate } from '../src/index.js';
+import { MARKER, ROW_VARIABLE, ANIMATION_NAME } from '../src/policy.js';
+import { STORAGE_PREFIX } from '../src/preferences.js';
+const report={checks:[],reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches};
+for (const key of Object.keys(localStorage)) if(key.startsWith(STORAGE_PREFIX)) localStorage.removeItem(key);
+const a=document.getElementById('a'),b=document.getElementById('b'),peer=document.getElementById('peer');
+const root=document.createElement('div'); document.body.append(root);
+const flush=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+const check=(name,pass,detail)=>{ report.checks.push({name,pass:!!pass,...detail===undefined?{}:{detail}}); if(!pass)throw Error(name); };
+function fakeUi() { return {settingsSections:{register(options){
+ check('typed route ID',options.id==='pet-work-loop'); const unmount=options.mount(document.getElementById('settings'));
+ return {unregister(){unmount();}};
+}}}; }
+const switchFor=name=>document.querySelector('input[aria-label="'+name+' 循环工作动画"]');
+const clickSwitch=async name=>{switchFor(name).click();await flush();};
+try {
+ const cleanup=activate({root,onCleanup:()=>{},ui:fakeUi()}); await flush();
+ check('all built-ins can be managed',!!switchFor('Dewey')&&!!switchFor('BSOD'));
+ check('current custom pet auto-discovered',!!switchFor('Demo-Penguin'));
+ check('built-in and custom both enabled',a.getAttribute(MARKER)==='on'&&b.getAttribute(MARKER)==='on');
+ check('logical task state untouched',a.dataset.codexPetState==='running'&&b.dataset.codexPetState==='running');
+ if(!report.reducedMotion){
+   for(const sprite of [a,b]){
+     const anim=sprite.getAnimations().find(x=>x.animationName===ANIMATION_NAME);check('real animation for '+sprite.id,!!anim);anim.pause();
+     for(const [time,frame] of [[1,0],[121,1],[241,2],[361,3],[481,4],[601,5],[819,5],[821,0],[2461,0],[4101,0]]){
+       sprite.style.backgroundPosition='0% 0%';anim.currentTime=time;const css=getComputedStyle(sprite);
+       check(sprite.id+' work frame at '+time+'ms',Math.abs(parseFloat(css.backgroundPositionX)-frame/7*100)<.001&&Math.abs(parseFloat(css.backgroundPositionY)-87.5)<.001,css.backgroundPosition);
+     }
+   }
+ }
+ peer.src='./peer.html';
+ for(let i=0;i<90&&!peer.contentDocument?.body?.hasAttribute('data-ready');i++)await flush();
+ const peerPet=peer.contentDocument?.getElementById('peer-pet'); check('second renderer ready',!!peerPet&&peerPet.getAttribute(MARKER)==='on');
+ await clickSwitch('Codex');
+ check('individual off',!a.hasAttribute(MARKER)); check('other pet unaffected',b.getAttribute(MARKER)==='on');
+ check('cross-window preference propagation',!peerPet.hasAttribute(MARKER));
+ check('per-pet override persisted',localStorage.getItem(STORAGE_PREFIX+'override:codex')==='false');
+ const master=document.querySelector('input[aria-label="启用持续工作动画（总开关）"]');master.click();await flush();
+ check('master disables every pet',!a.hasAttribute(MARKER)&&!b.hasAttribute(MARKER));
+ check('pet switches disabled under master off',switchFor('Codex').disabled&&switchFor('Demo-Penguin').disabled);
+ master.click();await flush();check('master preserves individual off',!a.hasAttribute(MARKER)&&b.getAttribute(MARKER)==='on');
+ const defaults=document.querySelector('input[aria-label="没有独立设置的宠物默认启用"]');defaults.click();await flush();
+ check('default off affects inherited pet',!b.hasAttribute(MARKER));
+ await clickSwitch('Demo-Penguin');check('explicit on overrides default off',b.getAttribute(MARKER)==='on');
+ defaults.click();await flush();check('default on does not erase Codex override',!a.hasAttribute(MARKER));
+ document.querySelector('button[aria-label="Codex 跟随默认设置"]').click();await flush();
+ check('reset restores inheritance',a.getAttribute(MARKER)==='on'&&peerPet.getAttribute(MARKER)==='on');
+ const search=document.querySelector('input[aria-label="搜索宠物"]');search.value='Demo-Penguin';search.dispatchEvent(new Event('input'));
+ check('search filters nonmatching pet',document.querySelector('[data-loop-pet-row="codex"]').hidden&&!document.querySelector('[data-loop-pet-row="custom:Demo-Penguin"]').hidden);
+ search.value='';search.dispatchEvent(new Event('input'));
+ const idInput=document.querySelector('input[aria-label="宠物 ID"]'),nameInput=document.querySelector('input[aria-label="显示名称（可选）"]');
+ idInput.value='pet_example';nameInput.value='My Account Pet';idInput.form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));await flush();
+ check('manual account pet appears',!!switchFor('My Account Pet'));
+ const late=b.cloneNode();late.dataset.codexPetId='pet_example';root.append(late);await flush();
+ check('account ID supported without recompiling',late.getAttribute(MARKER)==='on');
+ await clickSwitch('My Account Pet');check('manual pet independently disabled',!late.hasAttribute(MARKER)&&b.getAttribute(MARKER)==='on');
+ late.remove();await flush();
+ const clone=b.cloneNode();root.append(clone);await flush();clone.remove();await flush();check('cloned markers cleaned',!clone.hasAttribute(MARKER));
+ for(const state of ['idle','waiting','failed','review','jumping','running-left','running-right']){
+   b.dataset.codexPetState=state;b.style.backgroundPosition='42.8571% 25%';await flush();
+   check(state+' keeps native display',getComputedStyle(b).animationName==='none'&&Math.abs(parseFloat(getComputedStyle(b).backgroundPositionY)-25)<.001);
+ }
+ b.dataset.codexPetState='running';b.style.backgroundSize='800% 1100%';await flush();check('v2 geometry',b.style.getPropertyValue(ROW_VARIABLE)==='70%');
+ b.style.backgroundPositionY='90%';await flush();check('v2 pointer-look pose preserved',!b.hasAttribute(MARKER)&&getComputedStyle(b).backgroundPositionY==='90%');
+ b.style.backgroundPositionY='0%';await flush();check('work resumes after pointer-look',b.getAttribute(MARKER)==='on');
+ b.style.backgroundSize='800% 1000%';await flush();check('unknown geometry unchanged',!b.hasAttribute(MARKER));
+ b.style.backgroundSize='800% 900%';await flush();b.removeAttribute('data-codex-pet-id');await flush();check('removed identity cleaned',!b.hasAttribute(MARKER));
+ b.dataset.codexPetId='custom:Demo-Penguin';await flush();
+ // The page hint is the only app-language input; no private Intl/config access.
+ document.documentElement.lang='en-US';await flush();
+ const panel=document.querySelector('[data-codex-tweaks-pet-loop-panel]');
+ check('English automatic page language',panel.lang==='en'&&panel.querySelector('h2').textContent==='Pet Work Loop');
+ check('English ARIA and row status',!!panel.querySelector('input[aria-label="Codex: loop work animation"]')&&panel.querySelector('[data-loop-pet-row="codex"] .badge').textContent==='Built-in (known) · Use default');
+ check('English does not change playback preferences',a.getAttribute(MARKER)==='on'&&!panel.querySelector('input[aria-label="My Account Pet: loop work animation"]').checked);
+ document.documentElement.lang='fr-FR';await flush();
+ check('French falls back to English',panel.lang==='en'&&!!panel.querySelector('input[aria-label="Search pets"]'));
+ const langSelect=panel.querySelector('select');
+ langSelect.value='zh';langSelect.dispatchEvent(new Event('change'));await flush();
+ check('manual Chinese overrides non-Chinese page',panel.lang==='zh-CN'&&!!switchFor('Codex'));
+ check('language choice saved',localStorage.getItem(STORAGE_PREFIX+'language')==='"zh"');
+ document.documentElement.lang='zh-TW';await flush();
+ langSelect.value='en';langSelect.dispatchEvent(new Event('change'));await flush();
+ check('manual English overrides Chinese page',panel.lang==='en');
+ const focused=panel.querySelector('input[aria-label="Search pets"]');focused.value='Demo';focused.focus();focused.dispatchEvent(new Event('input'));
+ langSelect.value='auto';langSelect.dispatchEvent(new Event('change'));await flush();
+ check('automatic Chinese variants and focus preservation',panel.lang==='zh-CN'&&document.activeElement===focused&&focused.value==='Demo');
+ focused.value='';focused.dispatchEvent(new Event('input'));
+ const badId=panel.querySelector('input[aria-label="宠物 ID"]');badId.value='https://example.test/secret';badId.form.dispatchEvent(new Event('submit',{cancelable:true}));
+ check('Chinese form error translated',panel.textContent.includes('ID 无效'));
+ document.documentElement.lang='ja-JP';await flush();
+ check('existing form errors retranslate',panel.textContent.includes('Invalid ID:')&&!panel.textContent.includes('ID 无效'));
+ badId.value='';document.documentElement.lang='zh-CN';await flush();
+ cleanup();cleanup();await flush();
+ check('cleanup removes overlays',!a.hasAttribute(MARKER)&&!b.hasAttribute(MARKER));
+ check('cleanup removes variable',!b.style.getPropertyValue(ROW_VARIABLE));
+ check('cleanup removes manager',!document.querySelector('[data-codex-tweaks-pet-loop-panel]'));
+ check('cleanup removes stylesheet',!document.querySelector('style['+MARKER+']'));
+ document.documentElement.lang='en';await flush();check('language observer cleanup does not resurrect UI',!document.querySelector('[data-codex-tweaks-pet-loop-panel]'));
+ document.documentElement.lang='zh-CN';
+ activate({root,onCleanup:()=>{},ui:fakeUi()});await flush();
+ check('reinjection restores persisted account override',switchFor('My Account Pet').checked===false);
+ check('reinjection works for other pets',a.getAttribute(MARKER)==='on'&&b.getAttribute(MARKER)==='on');
+ report.ok=true;
+}catch(error){report.ok=false;report.error=String(error);}
+document.getElementById('status').textContent=report.ok?'PASS：全部浏览器测试通过':'FAIL：浏览器测试失败';
+document.getElementById('result').textContent=JSON.stringify(report,null,2);
+document.title=(report.ok?'PASS':'FAIL')+' — Pet Work Loop 1.1';
+</script></html>

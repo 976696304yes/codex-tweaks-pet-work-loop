@@ -1,0 +1,30 @@
+{
+  "name": "ct-pet-work-loop",
+  "version": "1.1.0",
+  "description": "Continuous work animation for compatible pets, with per-pet controls and Chinese/English settings. Disable to restore native playback.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "keywords": ["codex-tweaks-package", "codex-tweaks-ui"],
+  "scripts": { "test": "node --test tests/*.test.js" },
+  "dependencies": {},
+  "codexTweaks": {
+    "apiVersion": 3,
+    "entrypoints": { "renderer": "src/index.js" },
+    "priority": 100,
+    "packageDependencies": {},
+    "ui": {
+      "settingsSections": {
+        "apiVersion": 1,
+        "required": false,
+        "items": [{
+          "id": "pet-work-loop",
+          "title": "Pet Work Loop",
+          "group": "personal",
+          "icon": "personalization",
+          "after": "pets"
+        }]
+      }
+    }
+  }
+}
