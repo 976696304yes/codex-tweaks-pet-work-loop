@@ -5,25 +5,39 @@
   "type": "module",
   "private": true,
   "license": "MIT",
-  "keywords": ["codex-tweaks-package", "codex-tweaks-ui"],
-  "scripts": { "test": "node --test tests/*.test.js" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/976696304yes/codex-tweaks-pet-work-loop.git"
+  },
+  "homepage": "https://github.com/976696304yes/codex-tweaks-pet-work-loop",
+  "keywords": [
+    "codex-tweaks-package",
+    "codex-tweaks-ui"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "dependencies": {},
   "codexTweaks": {
     "apiVersion": 3,
-    "entrypoints": { "renderer": "src/index.js" },
+    "entrypoints": {
+      "renderer": "src/index.js"
+    },
     "priority": 100,
     "packageDependencies": {},
     "ui": {
       "settingsSections": {
         "apiVersion": 1,
         "required": false,
-        "items": [{
-          "id": "pet-work-loop",
-          "title": "Pet Work Loop",
-          "group": "personal",
-          "icon": "personalization",
-          "after": "pets"
-        }]
+        "items": [
+          {
+            "id": "pet-work-loop",
+            "title": "Pet Work Loop",
+            "group": "personal",
+            "icon": "personalization",
+            "after": "pets"
+          }
+        ]
       }
     }
   }
