@@ -4,7 +4,7 @@
 
 让兼容的 Codex 宠物在原生 `running` 状态下一直播放工作动画，并按宠物单独开关。不改图像、模型行为或任务状态。
 
-功能包 ID：`ct-pet-work-loop`。目录及建议仓库名：`codex-tweaks-pet-work-loop`。版本：1.1.0（未公开，包含本次双语修订）。
+功能包 ID：`ct-pet-work-loop`。仓库：[codex-tweaks-pet-work-loop](https://github.com/976696304yes/codex-tweaks-pet-work-loop)。版本：1.1.0。
 
 ## 功能
 
@@ -18,7 +18,7 @@
 
 ## 安装与设置
 
-1. 安装 Codex Tweaks，把目录或 ZIP 导入为一个包，根目录有 `package.json`。将来真实仓库发布后可从仓库安装发布标签；目前尚未公开。
+1. 在 Codex Tweaks 中通过 [Pet Work Loop 仓库](https://github.com/976696304yes/codex-tweaks-pet-work-loop)地址安装功能包，选择 `v1.1.0` 标签。也可从 [Releases](https://github.com/976696304yes/codex-tweaks-pet-work-loop/releases) 下载功能包 ZIP，解压后安装根目录包含 `package.json` 的文件夹。
 2. 旧名称安装若仍存在，先停用并移除（保留备份），避免两份同时运行。新包身份需手动开启。
 3. 在 Tweaks 编译/重新注入并启用 `ct-pet-work-loop`，无需 Node 授权。
 4. 打开 **设置 → Pet Work Loop**，位于个人设置组、原生宠物入口之后；设置语言及总开关、默认策略、独立开关。
@@ -70,6 +70,12 @@ node --check src/i18n.js
 
 在项目父目录启动本地 HTTP 服务，打开 `tests/harness.html`。测试使用符合接口形状的设置替身，不是真实路由；可选引用相邻 QQpet 图像用于观察，包内不带素材，没有图像也可执行 CSS/DOM 检查。
 
-## 许可证与公开
+## 许可证
 
-尚未公开。`UNLICENSED` 表示未授予开源许可，不是 Unlicense。选择许可证并添加完整 LICENSE 后再声明开源；真实仓库建立后填 repository/homepage。不要上传本机偏好或归档安装副本。
+本项目采用 [MIT 许可证](LICENSE)。
+
+该许可证适用于本仓库中的插件代码和文档。仓库不包含 QQ/腾讯角色图像或提取的 Codex 客户端模块。
+
+本项目为第三方非官方项目，与 OpenAI、腾讯无隶属关系。
+
+请勿提交本机偏好、个人账户记录、凭据、日志或归档安装副本。
